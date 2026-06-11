@@ -80,6 +80,7 @@ cd odysseus
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade --upgrade-strategy eager -r requirements.txt
+pip install --upgrade --upgrade-strategy eager -r requirements-optional.txt
 python setup.py
 python -m uvicorn app:app --host 127.0.0.1 --port 7000
 ```
