@@ -55,10 +55,10 @@ class LLMConfig(BaseSettings):
     openai_compat_path: str = Field(default="/v1/chat/completions", description="OpenAI compatible API path")
     
     # LLM behavior
-    max_context_messages: int = Field(default=90, description="Maximum number of context messages to keep")
-    request_timeout: int = Field(default=20, description="Request timeout in seconds")
-    llm_stream_timeout: int = Field(default=30, description="LLM streaming timeout in seconds")
-    llm_max_tokens: int = Field(default=4096, description="Maximum tokens for LLM responses")
+    max_context_messages: int = Field(default=9000, description="Maximum number of context messages to keep")
+    request_timeout: int = Field(default=2000, description="Request timeout in seconds")
+    llm_stream_timeout: int = Field(default=3000, description="LLM streaming timeout in seconds")
+    llm_max_tokens: int = Field(default=32768, description="Maximum tokens for LLM responses")
     llm_temperature: float = Field(default=0.3, description="Temperature for LLM responses")
     
     model_config = SettingsConfigDict(env_prefix="LLM_")

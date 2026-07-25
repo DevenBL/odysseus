@@ -92,13 +92,13 @@ DEFAULT_SETTINGS = {
     "research_model": "",
     "research_search_provider": "",
     "research_max_tokens": 16384,
-    "research_extraction_timeout_seconds": 90,
+    "research_extraction_timeout_seconds": 90000,
     # Lightweight planning/query LLM calls happen before any search starts.
     # Keep them separately tunable so slow local backends are not capped by
     # the old 30s/60s per-call defaults.
-    "research_planning_timeout_seconds": 90,
-    "research_query_timeout_seconds": 90,
-    "research_extraction_concurrency": 3,
+    "research_planning_timeout_seconds": 900000,
+    "research_query_timeout_seconds": 900000,
+    "research_extraction_concurrency": 300,
     # Hard wall-clock cap on a single deep-research run. The previous 600s
     # (10 min) default cut off slow local / edge LLMs mid-synthesis; 1800s
     # (30 min) is comfortable for most local setups while still bounding
@@ -106,9 +106,9 @@ DEFAULT_SETTINGS = {
     # for very long deep-research runs, since a stalled job then runs an
     # unbounded model/API bill. Other values are bounded to [60, 86400].
     # Tune via Settings or by editing data/settings.json.
-    "research_run_timeout_seconds": 1800,
+    "research_run_timeout_seconds": 1800000,
     "agent_max_tool_calls": 0,
-    "agent_max_rounds": 20,  # per-message agent step cap (clamped 1..200)
+    "agent_max_rounds": 200,  # per-message agent step cap (clamped 1..200)
     # Soft input-token budget for the agent loop. The DEFAULT value (6000) is the
     # "auto" sentinel: it means "scale the budget to the model's context window"
     # (#1230) — so long-context models aren't capped at 6000. Set ANY OTHER value
@@ -126,7 +126,7 @@ DEFAULT_SETTINGS = {
     # want to actually use (e.g. 900_000 to fill a 1M-context model). See
     # `compute_input_token_budget`.
     "agent_input_token_hard_max": 200_000,
-    "agent_stream_timeout_seconds": 300,
+    "agent_stream_timeout_seconds": 30000000,
     # Extra directory roots that read_file / write_file may access, in
     # addition to the built-in project data/ and system temp dirs. Each
     # entry is an absolute path. Sensitive subpaths (.ssh, .gnupg, shell
