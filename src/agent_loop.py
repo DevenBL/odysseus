@@ -1500,7 +1500,7 @@ def _minimal_saved_memory_message(messages: List[Dict]) -> Optional[Dict]:
     }
 
 
-def _resolved_tool_event_name(event: dict[str, Any]) -> str:
+def _resolved_tool_event_name(event: dict[str, any]) -> str:
     tool = str(event.get("tool") or "").strip()
     if tool != "mcp":
         return tool
@@ -1874,7 +1874,7 @@ def _normalize_ody_qwen_text_artifacts(text: str) -> str:
     return fixed
 
 
-def _ody_qwen_terminal_tool_summary(tool_event: dict[str, Any]) -> str:
+def _ody_qwen_terminal_tool_summary(tool_event: dict[str, any]) -> str:
     """Return a deterministic user-facing answer for tools we can render safely."""
     tool_name = _resolved_tool_event_name(tool_event)
     output = str(tool_event.get("output") or "")
