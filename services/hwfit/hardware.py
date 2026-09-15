@@ -36,13 +36,13 @@ def _run(cmd):
                 _remote_host,
                 _remote_port,
                 cmd_str,
-                timeout=15,
-                connect_timeout=5,
+                timeout=150000,
+                connect_timeout=500,
                 strict_host_key_checking=False,
                 text=True,
             )
         else:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=1000)
         if r.returncode == 0:
             return r.stdout.strip()
     except Exception:

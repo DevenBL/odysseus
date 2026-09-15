@@ -270,7 +270,7 @@ async def auto_name_session(session_manager, sess):
             temperature=0.3,
             max_tokens=4096,
             headers=t_headers,
-            timeout=60,
+            timeout=6000,
         )
 
         title = title.strip().strip('"\'').strip()
@@ -329,7 +329,7 @@ def try_fallback_endpoint(sess, session_id: str) -> dict | None:
         headers = build_headers(api_key, base)
         try:
             if ping_url:
-                r = _req.get(ping_url, headers=headers, timeout=5)
+                r = _req.get(ping_url, headers=headers, timeout=500)
                 r.raise_for_status()
                 data = r.json()
                 models = [m.get("id") for m in (data.get("data") or []) if m.get("id")]

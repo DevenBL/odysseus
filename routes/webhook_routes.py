@@ -338,7 +338,7 @@ def setup_webhook_routes(
 
             if model == "auto":
                 try:
-                    async with httpx.AsyncClient(timeout=5) as client:
+                    async with httpx.AsyncClient(timeout=500) as client:
                         models_url = build_models_url(base_url)
                         hdrs = build_headers(api_key, base_url)
                         if models_url:
@@ -380,7 +380,7 @@ def setup_webhook_routes(
 
         reply = await llm_call_async(
             sess.endpoint_url, sess.model, messages,
-            headers=sess.headers, timeout=120,
+            headers=sess.headers, timeout=12000,
         )
         sess.add_message(ChatMessage("assistant", reply))
         session_manager.save_sessions()

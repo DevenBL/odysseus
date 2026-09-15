@@ -90,7 +90,7 @@ jobs:
             for (let i = 0; i < 5; i++) {
               const { data } = await github.rest.pulls.get({ ...repo, pull_number: number });
               if (data.mergeable !== null) { pr = data; break; }
-              await new Promise(r => setTimeout(r, 3000));
+              await new Promise(r => setTimeout(r, 30000000));
             }
             if (!pr || pr.draft) return;
             const labels = pr.labels.map(l => l.name);

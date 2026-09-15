@@ -271,7 +271,7 @@ def _next_link(header):
     return m.group(1) if m else None
 
 
-def fetch_collection_models(source, timeout=20, max_pages=20):
+def fetch_collection_models(source, timeout=2000, max_pages=20):
     params = urllib.parse.urlencode({
         "owner": source["owner"],
         "limit": "100",

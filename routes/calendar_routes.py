@@ -940,7 +940,7 @@ def setup_calendar_routes(upload_handler=None) -> APIRouter:
                     _ssl_ctx.load_verify_locations(_ca_bundle)
                 else:
                     logger.warning("CalDAV test: CA bundle %s not found, using system CAs", _ca_bundle)
-            async with httpx.AsyncClient(timeout=8.0, follow_redirects=False, trust_env=False, verify=_ssl_ctx) as cx:
+            async with httpx.AsyncClient(timeout=800.0, follow_redirects=False, trust_env=False, verify=_ssl_ctx) as cx:
                 r = await cx.request(
                     "PROPFIND", url,
                     auth=(user, pw),
@@ -1588,7 +1588,7 @@ def setup_calendar_routes(upload_handler=None) -> APIRouter:
                 headers=headers,
                 temperature=0.0,
                 max_tokens=512,
-                timeout=20,
+                timeout=2000,
             )
         except Exception as e:
             return {"ok": False, "error": f"LLM call failed: {e}"}

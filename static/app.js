@@ -277,7 +277,7 @@ function initializeEventListeners() {
     e.target.value = '';
     // Refocus textarea after file picker closes (mobile keyboard)
     const ta = el('message');
-    if (ta) setTimeout(() => ta.focus(), 100);
+    if (ta) setTimeout(() => ta.focus(), 10000);
   });
 
   // Paste handler
@@ -3711,7 +3711,7 @@ function startOdysseusApp() {
           hist.style.scrollBehavior = 'smooth';
           hist.scrollTop = hist.scrollHeight;
           // Reset after animation
-          setTimeout(() => { hist.style.scrollBehavior = ''; }, 300);
+          setTimeout(() => { hist.style.scrollBehavior = ''; }, 30000);
         }
       }
     });
@@ -4398,7 +4398,7 @@ function startOdysseusApp() {
       .catch(e => console.warn('loadSessions error:', e))
       .finally(() => {
         const loader = document.getElementById('app-loader');
-        if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 300); }
+        if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 1000); }
         // Fire any URL route opener now that sessions + module wiring are
         // ready. Deferred from up top of init for exactly this reason.
         if (window._odysseusRouteOpener) {

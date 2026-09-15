@@ -770,7 +770,7 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
                 elif auth_type == "header":
                     headers[integ.get("auth_header") or "Authorization"] = api_key
             try:
-                async with httpx.AsyncClient(timeout=8.0) as client:
+                async with httpx.AsyncClient(timeout=800.0) as client:
                     r = await client.post(
                         full_url,
                         content="Connectivity test from Odysseus. If you see this on your phone, ntfy is wired up correctly.",
@@ -810,7 +810,7 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
                 }]
             }
             try:
-                async with httpx.AsyncClient(timeout=8.0) as client:
+                async with httpx.AsyncClient(timeout=800.0) as client:
                     r = await client.post(webhook_url, json=payload)
                 if r.is_success:
                     return {"ok": True, "message": "Test embed sent — check your Discord channel to confirm it arrived."}

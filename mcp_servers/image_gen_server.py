@@ -104,7 +104,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         if is_gpt_image:
             payload["quality"] = quality if quality in ("low", "medium", "high", "auto") else "medium"
 
-        async with httpx.AsyncClient(timeout=httpx.Timeout(connect=30.0, read=300.0, write=30.0, pool=30.0)) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(connect=300000.0, read=300.0, write=30.0, pool=30.0)) as client:
             resp = await client.post(images_url, json=payload, headers=headers)
 
             if resp.status_code != 200:

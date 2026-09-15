@@ -104,7 +104,7 @@ def is_local_endpoint(url: str) -> bool:
 # Constants
 # ---------------------------------------------------------------------------
 DEFAULT_CONTEXT = 128000
-REQUEST_TIMEOUT = 5
+REQUEST_TIMEOUT = 500
 
 # Known context windows for major API models (used as fallback when /models
 # endpoint doesn't report context_length).

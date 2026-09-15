@@ -97,7 +97,7 @@ class LLMConfig:
     DEFAULT_MAX_TOKENS = 0
     MAX_RETRIES = 3
     RETRY_DELAY = 0.5
-    STREAM_TIMEOUT = 300
+    STREAM_TIMEOUT = 30000
     # TCP+TLS connect budget for a SINGLE attempt. The old hard-coded 3.0s
     # assumed LAN/Tailscale peers ('SYN in <100ms'); it is too tight for public
     # cloud endpoints (offshore APIs take ~0.5-1.5s cold, with jitter), so a
@@ -105,7 +105,7 @@ class LLMConfig:
     # streaming path (which, unlike llm_call, does not retry the connect). A
     # genuinely dead upstream stays bounded by the dead-host cooldown. Override
     # with env LLM_CONNECT_TIMEOUT (seconds).
-    CONNECT_TIMEOUT = float(os.getenv('LLM_CONNECT_TIMEOUT', '10') or '10')
+    CONNECT_TIMEOUT = float(os.getenv('LLM_CONNECT_TIMEOUT', '1000') or '1000')
 
 
 def _call_timeout(read_timeout) -> httpx.Timeout:

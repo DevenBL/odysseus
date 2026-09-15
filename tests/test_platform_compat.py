@@ -264,13 +264,13 @@ def test_ssh_exec_argv_includes_port_and_options():
         "alice@gpu-box",
         "2222",
         remote_cmd="tmux ls",
-        connect_timeout=6,
+        connect_timeout=600,
         strict_host_key_checking=False,
     )
     assert argv == [
         "ssh",
         "-o",
-        "ConnectTimeout=6",
+        "ConnectTimeout=600",
         "-o",
         "StrictHostKeyChecking=no",
         "-p",
@@ -299,8 +299,8 @@ def test_run_ssh_command_uses_built_argv(monkeypatch):
         "alice@gpu-box",
         "2200",
         "tmux ls",
-        timeout=7,
-        connect_timeout=3,
+        timeout=700,
+        connect_timeout=300,
         strict_host_key_checking=True,
         text=False,
     )
@@ -309,7 +309,7 @@ def test_run_ssh_command_uses_built_argv(monkeypatch):
     assert captured["args"] == [
         "ssh",
         "-o",
-        "ConnectTimeout=3",
+        "ConnectTimeout=300",
         "-o",
         "StrictHostKeyChecking=yes",
         "-p",
@@ -317,6 +317,6 @@ def test_run_ssh_command_uses_built_argv(monkeypatch):
         "alice@gpu-box",
         "tmux ls",
     ]
-    assert captured["kwargs"]["timeout"] == 7
+    assert captured["kwargs"]["timeout"] == 700
     assert captured["kwargs"]["capture_output"] is True
     assert captured["kwargs"]["text"] is False

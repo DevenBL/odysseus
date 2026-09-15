@@ -121,7 +121,7 @@ def _refresh_google_token(account_id: str) -> str | None:
             "client_secret": client_secret,
             "refresh_token": refresh_token,
             "grant_type": "refresh_token",
-        }, timeout=10)
+        }, timeout=100000)
         resp.raise_for_status()
         data = resp.json()
         access_token = data["access_token"]
@@ -160,7 +160,7 @@ def _smtp_security_mode(cfg: dict) -> str:
     return "ssl"
 
 
-def _send_smtp_message(cfg: dict, from_addr: str, recipients: list[str], message: str | bytes, timeout: int = 30) -> None:
+def _send_smtp_message(cfg: dict, from_addr: str, recipients: list[str], message: str | bytes, timeout: int = 300000) -> None:
     """Send through SMTP using the configured transport security mode."""
     host = cfg["smtp_host"]
     port = int(cfg.get("smtp_port") or 465)

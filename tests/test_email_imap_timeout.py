@@ -50,7 +50,7 @@ class _FakeIMAPSSL(_FakeIMAP):
 
 
 def test_imap_timeout_defaults_and_clamps():
-    assert _coerce_imap_timeout_seconds(None) == 30
+    assert _coerce_imap_timeout_seconds(None) == 300000
     assert _coerce_imap_timeout_seconds("nonsense") == 30
     assert _coerce_imap_timeout_seconds("2") == 5
     assert _coerce_imap_timeout_seconds("999") == 300

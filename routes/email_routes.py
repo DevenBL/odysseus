@@ -4827,7 +4827,7 @@ def setup_email_routes():
             if _restricts_temperature(model):
                 payload.pop("temperature", None)
             resp = await asyncio.to_thread(
-                _req.post, url, json=payload, headers=req_headers, timeout=180
+                _req.post, url, json=payload, headers=req_headers, timeout=18000
             )
             if not resp.ok:
                 return {"success": False, "error": f"LLM HTTP {resp.status_code}"}
@@ -4979,7 +4979,7 @@ def setup_email_routes():
                 ],
                 temperature=0.2,
                 max_tokens=8192,
-                timeout=180,
+                timeout=18000,
             )
             model = candidates[0][1] if candidates else ""
             content = (content or "").strip()
@@ -5255,7 +5255,7 @@ def setup_email_routes():
                     messages=_messages,
                     temperature=0.7,
                     max_tokens=1024 if fast_reply else 6144,
-                    timeout=60 if fast_reply else 180,
+                    timeout=6000 if fast_reply else 18000,
                 )
             except Exception as e:
                 detail = getattr(e, "detail", None) or str(e)
@@ -5289,7 +5289,7 @@ def setup_email_routes():
                             headers=cand_headers,
                             temperature=0.3,
                             max_tokens=1536 if fast_reply else 4096,
-                            timeout=45 if fast_reply else 120,
+                            timeout=4500 if fast_reply else 12000,
                             max_retries=1,
                         )
                         retry_reply = _apply_email_style_mechanics(_extract_reply(raw_retry or ""))
@@ -5818,11 +5818,11 @@ def setup_email_routes():
                     smtp = smtplib.SMTP_SSL(
                         smtp_host,
                         smtp_port,
-                        timeout=10,
+                        timeout=1000,
                         **smtp_kwargs,
                     )
                 else:
-                    smtp = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+                    smtp = smtplib.SMTP(smtp_host, smtp_port, timeout=1000)
                     if smtp_security == "starttls":
                         try:
                             if google_ssl_context:
@@ -5942,7 +5942,7 @@ def setup_email_routes():
                 "client_secret": client_secret,
                 "redirect_uri": redirect_uri,
                 "grant_type": "authorization_code",
-            }, timeout=10)
+            }, timeout=100000)
             resp.raise_for_status()
             data = resp.json()
         except Exception:
@@ -5959,7 +5959,7 @@ def setup_email_routes():
         display_name = ""
         try:
             ui = _httpx.get("https://www.googleapis.com/oauth2/v1/userinfo",
-                            headers={"Authorization": f"Bearer {access_token}"}, timeout=10)
+                            headers={"Authorization": f"Bearer {access_token}"}, timeout=1000)
             if ui.is_success:
                 ui_data = ui.json()
                 email_addr = ui_data.get("email", "")

@@ -523,7 +523,7 @@ def setup_codex_routes(
     # allowlist (vllm/python3/sglang/llama-server/etc., no shell metachars)
     # keeps the agent inside the same sandbox the UI uses.
 
-    async def _run_shell(cmd: str, timeout: float = 15.0) -> dict:
+    async def _run_shell(cmd: str, timeout: float = 1500.0) -> dict:
         """Run a shell command, return {exit_code, stdout, stderr}."""
         import asyncio as _asyncio
         try:
@@ -624,7 +624,7 @@ def setup_codex_routes(
             cmd = f"ssh {port_flag}{host} {shlex.quote(inner)}"
         else:
             cmd = inner
-        result = await _run_shell(cmd, timeout=15)
+        result = await _run_shell(cmd, timeout=1500)
         return {
             "session_id": session_id,
             "host": host or "local",
@@ -686,7 +686,7 @@ def setup_codex_routes(
             cmd = f"ssh {port_flag}{host} \"tmux kill-session -t {session_id}\""
         else:
             cmd = f"tmux kill-session -t {session_id}"
-        result = await _run_shell(cmd, timeout=10)
+        result = await _run_shell(cmd, timeout=1000)
         return {"session_id": session_id, "exit_code": result.get("exit_code"), "host": host or "local"}
 
     @router.get("/cookbook/cached")
@@ -845,7 +845,7 @@ def setup_codex_routes(
             check = f"ssh {shlex.quote(host)} 'tmux has-session -t {shlex.quote(sess)}'"
         else:
             check = f"tmux has-session -t {shlex.quote(sess)}"
-        chk = await _run_shell(check, timeout=8)
+        chk = await _run_shell(check, timeout=800)
         if chk.get("exit_code") not in (0, None):
             raise HTTPException(404, f"tmux session {sess!r} not found on {host or 'local'}")
         # Write into cookbook_state.json.

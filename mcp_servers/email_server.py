@@ -33,7 +33,7 @@ from mcp.types import Tool, TextContent
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 server = Server("email")
-EMAIL_SOCKET_TIMEOUT = float(os.environ.get("EMAIL_SOCKET_TIMEOUT", "20"))
+EMAIL_SOCKET_TIMEOUT = float(os.environ.get("EMAIL_SOCKET_TIMEOUT", "200000"))
 from src.constants import DATA_DIR as _DATA_DIR, APP_DB, EMAIL_CACHE_DB, SETTINGS_FILE as _SETTINGS_FILE, MAIL_ATTACHMENTS_DIR
 DATA_DIR = Path(_DATA_DIR)
 
@@ -1862,7 +1862,7 @@ async def _ai_draft_reply_to_email(uid, folder="INBOX", reply_all=False, account
             ],
             temperature=0.7,
             max_tokens=1024,
-            timeout=60,
+            timeout=6000,
         )
     except Exception as exc:
         return {"error": f"AI reply generation failed: {exc}"}

@@ -188,7 +188,7 @@ def searxng_search_api(query: str, count: Optional[int] = None, categories: str 
                 f"{instance}/search",
                 params=search_params,
                 headers=headers or None,
-                timeout=15,
+                timeout=150000,
             )
             response.raise_for_status()
             data = response.json()
@@ -258,7 +258,7 @@ def searxng_search(query, max_results=10):
             f"{instance}/search",
             params={"q": query, "safesearch": _safesearch_for("searxng")},
             headers=req_headers,
-            timeout=10,
+            timeout=1000,
         )
         if response.is_success:
             soup = BeautifulSoup(response.text, "html.parser")

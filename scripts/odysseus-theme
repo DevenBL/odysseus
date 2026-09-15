@@ -75,7 +75,7 @@ def _builtin_preset_names() -> list[str]:
         try:
             out = subprocess.run(
                 ["node", "--input-type=module", "-e", script],
-                capture_output=True, text=True, timeout=10,
+                capture_output=True, text=True, timeout=100000,
             )
             if out.returncode == 0:
                 lines = [l for l in out.stdout.splitlines() if l.strip()]

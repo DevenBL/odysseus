@@ -340,7 +340,7 @@ def get_wsl_windows_user_profile() -> Optional[str]:
     if not is_wsl():
         return None
     try:
-        r = run_wsl_windows_powershell("Write-Output $env:USERPROFILE", timeout=5)
+        r = run_wsl_windows_powershell("Write-Output $env:USERPROFILE", timeout=50000)
         if r.returncode == 0 and r.stdout.strip():
             return translate_path(r.stdout.strip())
     except Exception:
@@ -435,7 +435,7 @@ def _windows_powershell_argv(
 def run_wsl_windows_powershell(
     command: str,
     *,
-    timeout: float = 5,
+    timeout: float = 50000,
 ) -> subprocess.CompletedProcess[str]:
     """Run a PowerShell command on the Windows host from WSL.
 

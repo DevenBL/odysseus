@@ -202,7 +202,7 @@ def main() -> int:
 
     req = urllib.request.Request(base_url + path, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
+        with urllib.request.urlopen(req, timeout=200000) as resp:
             print(resp.read().decode("utf-8"))
             return 0
     except urllib.error.HTTPError as exc:

@@ -894,7 +894,7 @@ _ADMIN_SCHEMA_NAMES = frozenset([
     "create_session", "list_sessions", "send_to_session", "pipeline",
     "ask_teacher", "list_models", "search_chats",
 ])
-_TOOL_SELECTION_TIMEOUT_SECONDS = 1.5
+_TOOL_SELECTION_TIMEOUT_SECONDS = 150.0
 
 
 def _is_ollama_openai_compat_url(endpoint_url: str) -> bool:
@@ -2977,7 +2977,7 @@ async def _run_verifier_subagent(
         raw = await llm_call_async(
             url=endpoint_url, model=model,
             messages=[{"role": "user", "content": prompt}],
-            headers=headers, temperature=0.0, max_tokens=600, timeout=60,
+            headers=headers, temperature=0.0, max_tokens=60000, timeout=60,
         )
     except Exception as e:
         logger.warning(f"[agent] verifier subagent failed: {e}")
@@ -3237,7 +3237,7 @@ async def stream_agent_loop(
                 max_tokens=min(max_tokens or 128, 128),
                 prompt_type=None,
                 tools=None,
-                timeout=int(get_setting("agent_stream_timeout_seconds", 300) or 300),
+                timeout=int(get_setting("agent_stream_timeout_seconds", 3000000) or 300),
                 session_id=session_id,
                 workload=workload,
             ):
@@ -3942,7 +3942,7 @@ async def stream_agent_loop(
             _last_content = _last_user.lower()
             _wants_mcp = any(kw in _last_content for kw in _MCP_KEYWORDS)
             all_tool_schemas = mcp_schemas if (_wants_mcp and mcp_schemas) else []
-        agent_stream_timeout = int(get_setting("agent_stream_timeout_seconds", 300) or 300)
+        agent_stream_timeout = int(get_setting("agent_stream_timeout_seconds", 3000000) or 300)
 
         _tool_names_sent = [t.get("function", {}).get("name") for t in (all_tool_schemas or []) if t.get("function")]
         logger.info(f"[agent-debug] round={round_num} model={model} _is_api_model={_is_api_model} tools_sent={len(_tool_names_sent)} tool_names={_tool_names_sent[:15]} relevant_tools={sorted(_relevant_tools)[:15] if _relevant_tools else 'ALL'}")
@@ -4314,7 +4314,7 @@ async def stream_agent_loop(
                     }]
                     _raw = await llm_call_async(
                         url=endpoint_url, model=model, messages=_synth_messages,
-                        headers=headers, temperature=0.3, max_tokens=max_tokens, timeout=60,
+                        headers=headers, temperature=0.3, max_tokens=max_tokens, timeout=6000,
                     )
                     _synth = _strip_think_blocks(strip_tool_blocks(_raw or "")).strip()
                 except Exception as _e:

@@ -109,7 +109,7 @@ def _capabilities_for(arch: str, hardware: dict, ctx_len: int, has_reasoning: bo
 
 
 def _fetch_manifest(client: httpx.Client) -> set[str]:
-    r = client.get(RECIPES_TREE_URL, headers={"Accept": "application/vnd.github+json"}, timeout=15)
+    r = client.get(RECIPES_TREE_URL, headers={"Accept": "application/vnd.github+json"}, timeout=150000)
     r.raise_for_status()
     tree = (r.json() or {}).get("tree") or []
     out: set[str] = set()
@@ -125,7 +125,7 @@ def _fetch_manifest(client: httpx.Client) -> set[str]:
 def _fetch_recipe(client: httpx.Client, repo: str) -> dict | None:
     url = RECIPE_RAW_URL.format(repo=repo)
     try:
-        r = client.get(url, timeout=10)
+        r = client.get(url, timeout=100000)
         if r.status_code != 200:
             return None
         return yaml.safe_load(r.text) or {}

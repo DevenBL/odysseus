@@ -137,7 +137,7 @@ def _append_openai_port_preflight_lines(lines: list[str], *, cmd: str, expected_
     lines.append("expected = (sys.argv[2] or '').strip()")
     lines.append("url = f'http://127.0.0.1:{port}/v1/models'")
     lines.append("try:")
-    lines.append("    with urllib.request.urlopen(url, timeout=1.5) as r:")
+    lines.append("    with urllib.request.urlopen(url, timeout=150) as r:")
     lines.append("        data = json.loads(r.read().decode('utf-8', 'replace') or '{}')")
     lines.append("except Exception:")
     lines.append("    raise SystemExit(0)")
@@ -234,7 +234,7 @@ async def _remote_binary_available(
         proc = await asyncio.create_subprocess_exec(
             "ssh",
             "-o",
-            "ConnectTimeout=6",
+            "ConnectTimeout=600",
             "-o",
             "StrictHostKeyChecking=no",
             *port_args,
@@ -243,7 +243,7 @@ async def _remote_binary_available(
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        await asyncio.wait_for(proc.communicate(), timeout=10)
+        await asyncio.wait_for(proc.communicate(), timeout=1000)
         return proc.returncode == 0
     except Exception:
         return False
@@ -840,7 +840,7 @@ def setup_cookbook_routes() -> APIRouter:
             stderr=asyncio.subprocess.PIPE,
         )
         try:
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=8)
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=800)
         except asyncio.TimeoutError:
             proc.kill()
             await proc.communicate()
@@ -948,8 +948,8 @@ def setup_cookbook_routes() -> APIRouter:
                 host,
                 ssh_port,
                 "echo ok",
-                timeout=8,
-                connect_timeout=5,
+                timeout=800,
+                connect_timeout=500,
                 strict_host_key_checking=False,
             )
         except asyncio.TimeoutError:
@@ -1421,7 +1421,7 @@ def setup_cookbook_routes() -> APIRouter:
                     stderr=asyncio.subprocess.PIPE,
                     cwd=str(Path.home()),
                 )
-            return await asyncio.wait_for(proc.communicate(), timeout=60), proc.returncode
+            return await asyncio.wait_for(proc.communicate(), timeout=6000), proc.returncode
 
         (stdout_b, stderr_b), returncode = await _run_cached_scan_once()
         stderr_txt = stderr_b.decode(errors="replace").strip()
@@ -1565,7 +1565,7 @@ def setup_cookbook_routes() -> APIRouter:
         if remote:
             # Probe over SSH. Bash's /dev/tcp gives a portable "is anything
             # listening" check without requiring ss/netstat/nmap.
-            ssh_base = ["ssh", "-o", "ConnectTimeout=4", "-o", "StrictHostKeyChecking=no"]
+            ssh_base = ["ssh", "-o", "ConnectTimeout=400", "-o", "StrictHostKeyChecking=no"]
             if ssh_port and str(ssh_port) != "22":
                 try:
                     ssh_port = validate_ssh_port(ssh_port)
@@ -1588,7 +1588,7 @@ def setup_cookbook_routes() -> APIRouter:
                 import subprocess
                 r = subprocess.run(
                     ssh_base + [host_arg, script],
-                    capture_output=True, text=True, timeout=8,
+                    capture_output=True, text=True, timeout=800,
                 )
                 if r.returncode == 0:
                     out = (r.stdout or "").strip().splitlines()
@@ -1659,7 +1659,7 @@ def setup_cookbook_routes() -> APIRouter:
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.DEVNULL,
                 )
-                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=8)
+                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=800)
                 output = stdout.decode("utf-8", errors="replace")
             except Exception as e:
                 logger.debug(f"crash-watchdog: capture-pane failed (will retry): {e!r}")
@@ -1696,7 +1696,7 @@ def setup_cookbook_routes() -> APIRouter:
                         # served model is ready.
                         try:
                             probe_url = ep.base_url.rstrip("/") + "/models"
-                            with urllib.request.urlopen(probe_url, timeout=3) as resp:
+                            with urllib.request.urlopen(probe_url, timeout=300) as resp:
                                 if 200 <= getattr(resp, "status", 0) < 300:
                                     logger.info(
                                         f"crash-watchdog: serve {session_id} has exit marker {exit_code} "
@@ -1837,7 +1837,7 @@ def setup_cookbook_routes() -> APIRouter:
                     else:
                         from routes.model_routes import _probe_endpoint
                         import json as _json2
-                        probed = _probe_endpoint(base_url, existing.api_key, timeout=5)
+                        probed = _probe_endpoint(base_url, existing.api_key, timeout=500)
                         if probed:
                             existing.cached_models = _json2.dumps(probed)
                             db.commit()
@@ -1905,7 +1905,7 @@ def setup_cookbook_routes() -> APIRouter:
                 else:
                     from routes.model_routes import _probe_endpoint
                     import json as _json2
-                    probed = _probe_endpoint(base_url, None, timeout=5)
+                    probed = _probe_endpoint(base_url, None, timeout=500)
                     if probed:
                         ep.cached_models = _json2.dumps(probed)
                         db.commit()
@@ -2814,7 +2814,7 @@ def setup_cookbook_routes() -> APIRouter:
             proc = await asyncio.create_subprocess_shell(
                 detect_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=10)
+            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=1000)
             out = stdout.decode().strip()
             if "Windows_NT" in out:
                 platform = "windows"
@@ -2824,7 +2824,7 @@ def setup_cookbook_routes() -> APIRouter:
                 proc2 = await asyncio.create_subprocess_shell(
                     detect_cmd2, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
                 )
-                stdout2, _ = await asyncio.wait_for(proc2.communicate(), timeout=10)
+                stdout2, _ = await asyncio.wait_for(proc2.communicate(), timeout=1000)
                 platform = stdout2.decode().strip()
         except Exception:
             platform = "linux"
@@ -2876,7 +2876,7 @@ def setup_cookbook_routes() -> APIRouter:
             proc = await asyncio.create_subprocess_shell(
                 cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=12000)
             output = stdout.decode() + stderr.decode()
             ok = "OK" in output
             return {"ok": ok, "output": output.strip(), "platform": platform}
@@ -2887,11 +2887,11 @@ def setup_cookbook_routes() -> APIRouter:
 
     # ── GPU availability probe ──
 
-    async def _run_nvidia_smi(query: str, host: str | None, ssh_port: str | None, timeout: int = 8):
+    async def _run_nvidia_smi(query: str, host: str | None, ssh_port: str | None, timeout: int = 800):
         """Run nvidia-smi locally or over SSH. Returns (stdout, error_or_None)."""
         if host:
             pf = f"-p {ssh_port} " if ssh_port and ssh_port != "22" else ""
-            cmd = f"ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no {pf}{host} '{query}'"
+            cmd = f"ssh -o ConnectTimeout=500 -o StrictHostKeyChecking=no {pf}{host} '{query}'"
             proc = await asyncio.create_subprocess_shell(
                 cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
@@ -2910,7 +2910,7 @@ def setup_cookbook_routes() -> APIRouter:
             return None, err or "nvidia-smi failed"
         return stdout.decode("utf-8", errors="replace"), None
 
-    async def _run_gpu_shell(cmd_text: str, host: str | None, ssh_port: str | None, timeout: int = 8):
+    async def _run_gpu_shell(cmd_text: str, host: str | None, ssh_port: str | None, timeout: int = 800):
         """Run a small GPU probe shell command locally or over SSH."""
         if host:
             pf = f"-p {ssh_port} " if ssh_port and ssh_port != "22" else ""
@@ -2921,7 +2921,7 @@ def setup_cookbook_routes() -> APIRouter:
                 f"elif command -v zsh >/dev/null 2>&1; then zsh -lc {quoted_cmd}; "
                 "else echo 'No POSIX shell found for GPU probe' >&2; exit 127; fi"
             )
-            cmd = f"ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no {pf}{host} {shlex.quote(remote_cmd)}"
+            cmd = f"ssh -o ConnectTimeout=500 -o StrictHostKeyChecking=no {pf}{host} {shlex.quote(remote_cmd)}"
             proc = await asyncio.create_subprocess_shell(
                 cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
@@ -2940,7 +2940,7 @@ def setup_cookbook_routes() -> APIRouter:
         return stdout.decode("utf-8", errors="replace"), None
 
     async def _gpu_read_file(path: str, host: str | None, ssh_port: str | None) -> str | None:
-        out, err = await _run_gpu_shell(f"cat {shlex.quote(path)} 2>/dev/null", host, ssh_port, timeout=4)
+        out, err = await _run_gpu_shell(f"cat {shlex.quote(path)} 2>/dev/null", host, ssh_port, timeout=400)
         if err is not None or out is None:
             return None
         return out.strip()
@@ -2953,7 +2953,7 @@ def setup_cookbook_routes() -> APIRouter:
             "fuser /dev/kfd /dev/dri/renderD* 2>/dev/null || true; } "
             "| tr ' ' '\\n' | sed '/^[0-9][0-9]*$/!d' | sort -n -u"
         )
-        out, err = await _run_gpu_shell(pid_cmd, host, ssh_port, timeout=5)
+        out, err = await _run_gpu_shell(pid_cmd, host, ssh_port, timeout=500)
         if err is not None or not out:
             return []
         processes = []
@@ -2966,13 +2966,13 @@ def setup_cookbook_routes() -> APIRouter:
             if pid in seen:
                 continue
             seen.add(pid)
-            name_out, _ = await _run_gpu_shell(f"ps -p {pid} -o comm= 2>/dev/null", host, ssh_port, timeout=3)
+            name_out, _ = await _run_gpu_shell(f"ps -p {pid} -o comm= 2>/dev/null", host, ssh_port, timeout=300)
             name = (name_out or "").strip().splitlines()[0] if (name_out or "").strip() else "process"
             processes.append({"pid": pid, "name": name[:80], "used_mb": 0})
         return processes
 
     async def _probe_amd_sysfs(host: str | None, ssh_port: str | None) -> list[dict]:
-        out, err = await _run_gpu_shell("ls -1 /sys/class/drm 2>/dev/null", host, ssh_port, timeout=4)
+        out, err = await _run_gpu_shell("ls -1 /sys/class/drm 2>/dev/null", host, ssh_port, timeout=400)
         if err is not None or not out:
             return []
         # Pick the runtime label up-front so each GPU dict gets the
@@ -2986,7 +2986,7 @@ def setup_cookbook_routes() -> APIRouter:
             '|| (command -v hipconfig >/dev/null 2>&1 && echo rocm) '
             '|| (command -v vulkaninfo >/dev/null 2>&1 && echo vulkan) '
             '|| echo unknown',
-            host, ssh_port, timeout=4,
+            host, ssh_port, timeout=400,
         )
         _amd_runtime = (rt_out or "").strip().splitlines()[-1:][0].strip() if rt_out else "rocm"
         if _amd_runtime not in ("rocm", "vulkan"):
@@ -3060,7 +3060,7 @@ def setup_cookbook_routes() -> APIRouter:
             "/Pages purgeable/ {gsub(/[^0-9]/, \"\", $3); purgeable=$3} "
             "END {if (!page) page=16384; print page, free+inactive+speculative+purgeable}'"
         )
-        out, err = await _run_gpu_shell(cmd, host, ssh_port, timeout=6)
+        out, err = await _run_gpu_shell(cmd, host, ssh_port, timeout=600)
         if err is not None or not out:
             return None
         lines = [ln.strip() for ln in out.splitlines() if ln.strip()]
@@ -3164,7 +3164,7 @@ def setup_cookbook_routes() -> APIRouter:
         # Best-effort process listing — skip silently if it fails
         proc_query = "nvidia-smi --query-compute-apps=pid,gpu_uuid,process_name,used_memory --format=csv,noheader,nounits"
         try:
-            proc_out, proc_err = await _run_nvidia_smi(proc_query, host, ssh_port, timeout=5)
+            proc_out, proc_err = await _run_nvidia_smi(proc_query, host, ssh_port, timeout=500)
             if proc_err is None and proc_out:
                 gpus_by_idx = {g["index"]: g for g in gpus}
                 for line in proc_out.strip().splitlines():
@@ -3295,7 +3295,7 @@ def setup_cookbook_routes() -> APIRouter:
         try:
             if host:
                 pf = f"-p {req.ssh_port} " if req.ssh_port and req.ssh_port != "22" else ""
-                cmd = f"ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no {pf}{host} '{kill_cmd}'"
+                cmd = f"ssh -o ConnectTimeout=500 -o StrictHostKeyChecking=no {pf}{host} '{kill_cmd}'"
                 proc = await asyncio.create_subprocess_shell(
                     cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
                 )
@@ -3314,7 +3314,7 @@ def setup_cookbook_routes() -> APIRouter:
                     "kill", f"-{sig}", str(req.pid),
                     stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
                 )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=5)
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=500)
             if proc.returncode != 0:
                 err = (stderr.decode("utf-8", errors="replace") or "").strip()[:200]
                 return {"ok": False, "error": err or f"kill returned {proc.returncode}"}
@@ -3495,7 +3495,7 @@ def setup_cookbook_routes() -> APIRouter:
             f"?sort=trendingScore&direction=-1&limit={pool_size}&filter={pipeline}"
         )
         try:
-            async with httpx.AsyncClient(timeout=15) as client:
+            async with httpx.AsyncClient(timeout=1500) as client:
                 resp = await client.get(url)
                 if resp.status_code != 200:
                     return {"models": [], "error": f"HF API HTTP {resp.status_code}"}
@@ -3669,7 +3669,7 @@ def setup_cookbook_routes() -> APIRouter:
             except HTTPException:
                 continue
             sport = str(srv.get("port") or "").strip()
-            ssh_base = ["ssh", "-o", "ConnectTimeout=4", "-o", "StrictHostKeyChecking=no"]
+            ssh_base = ["ssh", "-o", "ConnectTimeout=400", "-o", "StrictHostKeyChecking=no"]
             if sport and sport != "22":
                 try:
                     sport = validate_ssh_port(sport)
@@ -3681,7 +3681,7 @@ def setup_cookbook_routes() -> APIRouter:
             try:
                 ls = subprocess.run(
                     ssh_base + [host, _remote_tmux_command("ls")],
-                    timeout=6, capture_output=True, text=True,
+                    timeout=600, capture_output=True, text=True,
                 )
             except Exception:
                 continue
@@ -3694,7 +3694,7 @@ def setup_cookbook_routes() -> APIRouter:
                 try:
                     cap = subprocess.run(
                         ssh_base + [host, _remote_tmux_command("capture-pane", "-t", sid, "-p", "-S", "-300")],
-                        timeout=6, capture_output=True, text=True,
+                        timeout=600, capture_output=True, text=True,
                     )
                     pane = cap.stdout or ""
                 except Exception:
@@ -3705,7 +3705,7 @@ def setup_cookbook_routes() -> APIRouter:
                     try:
                         script = subprocess.run(
                             ssh_base + [host, "cat", f".{sid}_run.sh"],
-                            timeout=6, capture_output=True, text=True,
+                            timeout=600, capture_output=True, text=True,
                         )
                         script_text = script.stdout or ""
                     except Exception:
@@ -3767,7 +3767,7 @@ def setup_cookbook_routes() -> APIRouter:
                     pc = subprocess.run(
                         ssh_base + [host, "tmux", "list-panes", "-t", sid,
                                     "-F", "#{pane_current_command}"],
-                        timeout=4, capture_output=True, text=True,
+                        timeout=400, capture_output=True, text=True,
                     )
                     cur = (pc.stdout or "").strip().splitlines()
                 except Exception:
@@ -3838,7 +3838,7 @@ def setup_cookbook_routes() -> APIRouter:
             token = _load_stored_hf_token()
             if token:
                 headers["Authorization"] = f"Bearer {token}"
-            async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            async with httpx.AsyncClient(timeout=1500, follow_redirects=True) as client:
                 resp = await client.get(url, headers=headers)
                 if resp.status_code != 200:
                     return {"ok": False, "files": [], "error": f"HF API HTTP {resp.status_code}"}
@@ -3906,7 +3906,7 @@ def setup_cookbook_routes() -> APIRouter:
             models: list[dict] = []
             err = None
             try:
-                async with _httpx.AsyncClient(timeout=8, follow_redirects=True) as client:
+                async with _httpx.AsyncClient(timeout=800, follow_redirects=True) as client:
                     resp = await client.get(
                         "https://ollama.com/search?sort=popular",
                         headers={"User-Agent": "odysseus-cookbook/1.0"},
@@ -4000,7 +4000,7 @@ def setup_cookbook_routes() -> APIRouter:
             def _fetch_sync() -> tuple[int, dict | None, str]:
                 try:
                     headers = {"Accept": "application/vnd.github+json"}
-                    with _httpx.Client(timeout=10.0, follow_redirects=True) as client:
+                    with _httpx.Client(timeout=1000.0, follow_redirects=True) as client:
                         r = client.get(url, headers=headers)
                         if r.status_code != 200:
                             return r.status_code, None, r.text[:200]
@@ -4065,7 +4065,7 @@ def setup_cookbook_routes() -> APIRouter:
 
         def _fetch_sync() -> tuple[int, str]:
             try:
-                with _httpx.Client(timeout=8.0, follow_redirects=True) as client:
+                with _httpx.Client(timeout=800.0, follow_redirects=True) as client:
                     r = client.get(url)
                     return r.status_code, r.text
             except Exception as e:
@@ -4230,9 +4230,9 @@ def setup_cookbook_routes() -> APIRouter:
                     if ssh_port and ssh_port != "22":
                         ssh_base.extend(["-p", str(ssh_port)])
                     shell_cmd = " ".join(shlex.quote(x) for x in cmd)
-                    proc = subprocess.run(ssh_base + [remote_host, shell_cmd], timeout=12, capture_output=True)
+                    proc = subprocess.run(ssh_base + [remote_host, shell_cmd], timeout=1200, capture_output=True)
                 else:
-                    proc = subprocess.run(cmd, timeout=12, capture_output=True)
+                    proc = subprocess.run(cmd, timeout=1200, capture_output=True)
                 return proc.returncode == 0
             except Exception:
                 return False
@@ -4253,9 +4253,9 @@ def setup_cookbook_routes() -> APIRouter:
                     if ssh_port and ssh_port != "22":
                         ssh_base.extend(["-p", str(ssh_port)])
                     shell_cmd = " ".join(shlex.quote(x) for x in cmd)
-                    proc = subprocess.run(ssh_base + [remote_host, shell_cmd], timeout=12, capture_output=True)
+                    proc = subprocess.run(ssh_base + [remote_host, shell_cmd], timeout=1200, capture_output=True)
                 else:
-                    proc = subprocess.run(cmd, timeout=12, capture_output=True)
+                    proc = subprocess.run(cmd, timeout=1200, capture_output=True)
                 return proc.returncode == 0
             except Exception:
                 return False
@@ -4416,7 +4416,7 @@ def setup_cookbook_routes() -> APIRouter:
                     full_snapshot = (task.get("output") or "")[-12000:]
                 else:
                     try:
-                        alive = subprocess.run(check_cmd, timeout=4, capture_output=True)
+                        alive = subprocess.run(check_cmd, timeout=400, capture_output=True)
                         is_alive = alive.returncode == 0
                     except Exception:
                         is_alive = False
@@ -4426,7 +4426,7 @@ def setup_cookbook_routes() -> APIRouter:
                     # lags with hf_transfer). Falls back to the true last line otherwise.
                     if is_alive:
                         try:
-                            cap = subprocess.run(capture_cmd, timeout=4, capture_output=True, text=True)
+                            cap = subprocess.run(capture_cmd, timeout=400, capture_output=True, text=True)
                             if cap.returncode == 0:
                                 full_snapshot = cap.stdout.strip()
                                 lines = [l.strip() for l in full_snapshot.split('\n') if l.strip()]

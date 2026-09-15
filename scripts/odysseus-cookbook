@@ -61,7 +61,7 @@ def _tmux_sessions() -> list[str]:
     try:
         out = subprocess.run(
             ["tmux", "list-sessions", "-F", "#S"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True, text=True, timeout=500,
         )
         if out.returncode != 0:
             return []
@@ -108,7 +108,7 @@ def _macos_metal_gpu() -> list | None:
 
     def _sysctl(key: str) -> str | None:
         try:
-            r = subprocess.run(["sysctl", "-n", key], capture_output=True, text=True, timeout=5)
+            r = subprocess.run(["sysctl", "-n", key], capture_output=True, text=True, timeout=500)
             return r.stdout.strip() if r.returncode == 0 else None
         except Exception:
             return None
@@ -121,7 +121,7 @@ def _macos_metal_gpu() -> list | None:
 
     free_mb = total_mb
     try:
-        vm = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=5)
+        vm = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=500)
         if vm.returncode == 0:
             page_size, pages = 4096, {}
             for line in vm.stdout.splitlines():
@@ -178,11 +178,11 @@ def cmd_gpus(args) -> None:
 
             out = None
             for candidate in candidates:
-                out = subprocess.run(prefix + [candidate], capture_output=True, text=True, timeout=15)
+                out = subprocess.run(prefix + [candidate], capture_output=True, text=True, timeout=1500)
                 if out.returncode == 0:
                     break
         else:
-            out = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+            out = subprocess.run(cmd, capture_output=True, text=True, timeout=1500)
     except FileNotFoundError:
         # No nvidia-smi locally → try the Metal fallback before giving up.
         if not prefix:
@@ -271,7 +271,7 @@ def cmd_hf_latest(args) -> None:
         f"?sort=trendingScore&direction=-1&limit={pool_size}&filter={urllib.parse.quote(args.pipeline)}"
     )
     try:
-        with urllib.request.urlopen(url, timeout=15) as resp:
+        with urllib.request.urlopen(url, timeout=1500) as resp:
             raw = json.loads(resp.read().decode("utf-8"))
     except Exception as e:
         fail(f"HF API request failed: {e}")
@@ -334,7 +334,7 @@ def cmd_download(args) -> None:
         )
         ssh_argv = _ssh_prefix(args.host, args.ssh_port) + [remote_shell_cmd]
         try:
-            out = subprocess.run(ssh_argv, capture_output=True, text=True, timeout=20)
+            out = subprocess.run(ssh_argv, capture_output=True, text=True, timeout=2000)
         except FileNotFoundError:
             fail("ssh not installed")
         if out.returncode != 0:
@@ -356,7 +356,7 @@ def cmd_download(args) -> None:
     try:
         subprocess.run(
             ["tmux", "new-session", "-d", "-s", session_id, "bash", "-lc", shell_cmd],
-            check=True, capture_output=True, text=True, timeout=10,
+            check=True, capture_output=True, text=True, timeout=1000,
         )
     except FileNotFoundError:
         fail("tmux not installed — can't run background sessions from CLI")
@@ -401,7 +401,7 @@ def cmd_serve(args) -> None:
     try:
         subprocess.run(
             ["tmux", "new-session", "-d", "-s", session_id, "bash", "-lc", shell_cmd],
-            check=True, capture_output=True, text=True, timeout=10,
+            check=True, capture_output=True, text=True, timeout=1000,
         )
     except FileNotFoundError:
         fail("tmux not installed")
@@ -458,7 +458,7 @@ def _ssh_prefix(host: str | None, port: str | None) -> list[str]:
     cmd = ["ssh"]
     if port:
         cmd += ["-p", str(port)]
-    cmd += ["-o", "BatchMode=yes", "-o", "ConnectTimeout=5", host]
+    cmd += ["-o", "BatchMode=yes", "-o", "ConnectTimeout=500", host]
     return cmd
 
 
@@ -471,7 +471,7 @@ def cmd_kill(args) -> None:
     base = ["tmux", "kill-session", "-t", args.session]
     cmd = _ssh_prefix(args.host, args.ssh_port) + base if args.host else base
     try:
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        out = subprocess.run(cmd, capture_output=True, text=True, timeout=1000)
     except FileNotFoundError:
         fail("tmux not installed" if not args.host else "ssh not installed")
     already_gone = out.returncode != 0 and "can't find session" in (out.stderr or "").lower()

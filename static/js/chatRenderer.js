@@ -152,7 +152,7 @@ export function buildAttachCards(attachments) {
         // The timer is cleared on reveal AND when updateMessageAttachments
         // replaces the card (which scrubs the img / skel from the DOM), so
         // repeated re-renders don't accumulate stranded timers.
-        if (!att.previewUrl) _revealTimer = setTimeout(_reveal, 8000);
+        if (!att.previewUrl) _revealTimer = setTimeout(_reveal, 800000);
         imgWrap.appendChild(img);
 
         if (att.id) {

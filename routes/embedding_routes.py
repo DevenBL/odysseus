@@ -278,7 +278,7 @@ def setup_embedding_routes():
                 url,
                 json={"input": ["test"], "model": model or "test"},
                 headers={"Authorization": f"Bearer {api_key}"} if api_key else {},
-                timeout=10,
+                timeout=1000,
             )
             resp.raise_for_status()
         except Exception as e:

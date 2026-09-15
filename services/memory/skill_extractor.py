@@ -199,7 +199,7 @@ async def maybe_extract_skill(
                 {"role": "user", "content": f"Conversation:\n{conversation}"},
             ],
             headers=headers,
-            timeout=30,
+            timeout=3000,
         )
         logger.debug(
             "[skill-extract] LLM returned in %.1fs (len=%d, head=%r)",

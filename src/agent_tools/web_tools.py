@@ -55,7 +55,7 @@ class WebSearchTool:
                         return_sources=True,
                     ),
                 ),
-                timeout=30,
+                timeout=3000,
             )
         except asyncio.TimeoutError:
             return {
@@ -111,7 +111,7 @@ class WebFetchTool:
         loop = asyncio.get_running_loop()
         try:
             def _fetch():
-                kwargs = {"timeout": 10}
+                kwargs = {"timeout": 1000}
                 try:
                     sig = inspect.signature(fetch_webpage_content)
                     if "max_bytes" in sig.parameters:
@@ -124,7 +124,7 @@ class WebFetchTool:
 
             result = await asyncio.wait_for(
                 loop.run_in_executor(None, _fetch),
-                timeout=30,
+                timeout=3000,
             )
         except asyncio.TimeoutError:
             return {"error": f"web_fetch: timed out fetching {url}", "exit_code": 1}

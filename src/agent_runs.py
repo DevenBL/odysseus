@@ -14,6 +14,7 @@ live (pick up where it is).
 Durability scope: in-memory, survives as long as the server process runs (tab
 close / navigation / refresh). It does NOT survive a server restart.
 """
+
 import asyncio
 import json
 import logging
@@ -26,9 +27,9 @@ class _Run:
     __slots__ = ("buffer", "subscribers", "status", "task", "evict_task")
 
     def __init__(self) -> None:
-        self.buffer: list = []          # ordered SSE event strings (replay log)
-        self.subscribers: set = set()   # one asyncio.Queue per connected client
-        self.status: str = "running"    # running | done | error | stopped
+        self.buffer: list = []  # ordered SSE event strings (replay log)
+        self.subscribers: set = set()  # one asyncio.Queue per connected client
+        self.status: str = "running"  # running | done | error | stopped
         self.task: Optional[asyncio.Task] = None
         self.evict_task: Optional[asyncio.Task] = None
 
@@ -39,7 +40,7 @@ _RUNS: Dict[str, _Run] = {}
 # last subscriber disconnects, so a reconnect within the window can still
 # replay the result. After this, the run is evicted to bound memory — without
 # it, every session that ever streamed kept its entire event log forever.
-_EVICT_GRACE_S = 180
+_EVICT_GRACE_S = 18000
 
 
 def _publish(run: _Run, ev: str) -> None:
@@ -85,8 +86,11 @@ def get_status(session_id: str) -> Optional[str]:
     return r.status if r else None
 
 
-async def _drain(session_id: str, agen: AsyncGenerator[str, None],
-                 prev_task: Optional[asyncio.Task] = None) -> None:
+async def _drain(
+    session_id: str,
+    agen: AsyncGenerator[str, None],
+    prev_task: Optional[asyncio.Task] = None,
+) -> None:
     """Pull every event from the wrapped generator into the run buffer, fanning
     each out to live subscribers. Runs to completion regardless of subscribers."""
     run = _RUNS.get(session_id)
@@ -100,7 +104,7 @@ async def _drain(session_id: str, agen: AsyncGenerator[str, None],
         try:
             await asyncio.wait({prev_task})
         except asyncio.CancelledError:
-            raise            # our own cancellation — propagate
+            raise  # our own cancellation — propagate
         except Exception:
             pass
     try:
@@ -146,7 +150,7 @@ def start(session_id: str, agen: AsyncGenerator[str, None]) -> _Run:
     if prev:
         if prev.task and not prev.task.done():
             prev.task.cancel()
-            prev_task = prev.task   # new run awaits this before it starts writing
+            prev_task = prev.task  # new run awaits this before it starts writing
         if prev.evict_task and not prev.evict_task.done():
             prev.evict_task.cancel()
     run = _Run()
@@ -162,7 +166,7 @@ async def subscribe(session_id: str) -> AsyncGenerator[str, None]:
     if run is None:
         return
     q: asyncio.Queue = asyncio.Queue()
-    run.subscribers.add(q)            # register BEFORE replaying so nothing is missed
+    run.subscribers.add(q)  # register BEFORE replaying so nothing is missed
     # A live subscriber is connected — don't let a pending grace timer evict
     # the run out from under it mid-replay.
     if run.evict_task and not run.evict_task.done():
@@ -177,7 +181,7 @@ async def subscribe(session_id: str) -> AsyncGenerator[str, None]:
         heartbeat_idx = 0
         while True:
             try:
-                seq, ev = await asyncio.wait_for(q.get(), timeout=10.0)
+                seq, ev = await asyncio.wait_for(q.get(), timeout=100000.0)
             except asyncio.TimeoutError:
                 # Keep slow local models/proxies alive while they prefill before
                 # the first token. SSE comments are ignored by the UI but reset
@@ -188,12 +192,12 @@ async def subscribe(session_id: str) -> AsyncGenerator[str, None]:
                     yield f": heartbeat {heartbeat_idx}\n\n"
                     continue
                 seq, ev = (None, None)
-            if seq is None:            # end sentinel
-                while next_seq < len(run.buffer):   # flush any tail the sentinel raced
+            if seq is None:  # end sentinel
+                while next_seq < len(run.buffer):  # flush any tail the sentinel raced
                     yield run.buffer[next_seq]
                     next_seq += 1
                 break
-            if seq >= next_seq:        # skip events already replayed from the buffer
+            if seq >= next_seq:  # skip events already replayed from the buffer
                 yield ev
                 next_seq = seq + 1
     finally:

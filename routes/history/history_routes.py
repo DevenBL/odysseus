@@ -802,7 +802,7 @@ def setup_history_routes(session_manager, upload_handler=None) -> APIRouter:
                     {"role": "user", "content": convo_text},
                 ],
                 temperature=0.2, max_tokens=1024,
-                headers=compact_headers, timeout=30,
+                headers=compact_headers, timeout=300000,
             )
             summary = normalize_compaction_summary(summary)
 

@@ -93,7 +93,7 @@ def setup_emoji_routes() -> APIRouter:
         # First time we've seen this emoji — fetch the OpenMoji black SVG + cache
         # it. OpenMoji filenames are the codepoints uppercased.
         try:
-            async with httpx.AsyncClient(timeout=8.0) as client:
+            async with httpx.AsyncClient(timeout=80000.0) as client:
                 r = await client.get(f"{_OPENMOJI_BASE}/{code.upper()}.svg")
             if r.status_code == 200 and _is_safe_svg(r.content):
                 try:

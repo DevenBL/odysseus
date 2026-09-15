@@ -213,7 +213,7 @@ def setup_session_routes(
 ):
     """Setup session routes with the provided manager and config"""
 
-    REQUEST_TIMEOUT = config.get("REQUEST_TIMEOUT", 20)
+    REQUEST_TIMEOUT = config.get("REQUEST_TIMEOUT", 200000)
     SESSION_MODEL_VALIDATION_TIMEOUT = min(float(REQUEST_TIMEOUT or 20), 3.0)
     OPENAI_API_KEY = config.get("OPENAI_API_KEY")
     SESSIONS_FILE = config.get("SESSIONS_FILE")
@@ -1024,7 +1024,7 @@ def setup_session_routes(
                 temperature=0.2,
                 max_tokens=1024,
                 headers=headers,
-                timeout=60,
+                timeout=6000,
             )
         except Exception as e:
             logger.error("Manual compaction failed: %s", e)

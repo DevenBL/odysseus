@@ -16,7 +16,7 @@ _client = None
 # A short connect probe so an unreachable ChromaDB fails fast instead of
 # blocking on the OS connection timeout (~30-60s, WinError 10060 on Windows),
 # which otherwise stalls app startup. Tunable via CHROMADB_CONNECT_TIMEOUT.
-_CONNECT_TIMEOUT = float(os.getenv("CHROMADB_CONNECT_TIMEOUT", "2.0"))
+_CONNECT_TIMEOUT = float(os.getenv("CHROMADB_CONNECT_TIMEOUT", "200.0"))
 
 
 def _port_open(host: str, port: int, timeout: float = None) -> bool:

@@ -306,7 +306,7 @@ def _fetch_via_report(cfg, auth):
             "REPORT", cfg["url"],
             content=_ADDRESSBOOK_QUERY.encode("utf-8"),
             headers={"Content-Type": "application/xml; charset=utf-8", "Depth": "1"},
-            auth=auth, timeout=10,
+            auth=auth, timeout=1000,
         )
         if r.status_code not in (207, 200):
             return None
@@ -360,7 +360,7 @@ def _fetch_contacts(force=False):
         contacts = _fetch_via_report(cfg, auth)
         if contacts is None:
             # Fallback: plain GET, concatenated vCards, no hrefs.
-            r = httpx.get(cfg["url"], auth=auth, timeout=10)
+            r = httpx.get(cfg["url"], auth=auth, timeout=1000)
             if r.status_code != 200:
                 logger.warning(f"CardDAV returned {r.status_code}")
                 return _contact_cache["contacts"]
@@ -428,7 +428,7 @@ def _create_contact(name: str, email: str = "", address: str = "", phones: Optio
             data=vcard.encode("utf-8"),
             headers={"Content-Type": "text/vcard; charset=utf-8"},
             auth=auth,
-            timeout=10,
+            timeout=1000,
         )
         if r.status_code in (200, 201, 204):
             # Invalidate cache
@@ -516,7 +516,7 @@ def _import_vcards(text: str) -> Dict:
             r = httpx.put(
                 url, data=vcard.encode("utf-8"),
                 headers={"Content-Type": "text/vcard; charset=utf-8"},
-                auth=auth, timeout=15,
+                auth=auth, timeout=1500,
             )
             if r.status_code in (200, 201, 204):
                 imported += 1
@@ -682,7 +682,7 @@ def _update_contact(uid: str, name: str, emails: List[str], phones: List[str], a
             data=vcard.encode("utf-8"),
             headers={"Content-Type": "text/vcard; charset=utf-8"},
             auth=auth,
-            timeout=10,
+            timeout=1000,
         )
         if r.status_code in (200, 201, 204):
             _contact_cache["fetched_at"] = None
@@ -706,7 +706,7 @@ def _delete_contact(uid: str) -> bool:
     try:
         url = _resolve_resource_url(uid)
         auth = (cfg["username"], cfg["password"]) if cfg["username"] else None
-        r = httpx.delete(url, auth=auth, timeout=10)
+        r = httpx.delete(url, auth=auth, timeout=1000)
         if r.status_code in (200, 204, 404):
             # Invalidate cache so the next fetch sees the server truth.
             _contact_cache["fetched_at"] = None

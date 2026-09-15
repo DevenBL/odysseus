@@ -1105,7 +1105,7 @@ async function showModelSelector() {
         const results = await Promise.all(modelsToProbe.map(m =>
           Promise.race([
             _probeOne(m),
-            new Promise(r => setTimeout(() => r({ status: 'fail', error: 'Timeout' }), 15000))
+            new Promise(r => setTimeout(() => r({ status: 'fail', error: 'Timeout' }), 1500000))
           ])
         ));
         if (_probeSkipped) return;
@@ -1149,7 +1149,7 @@ async function showModelSelector() {
               for (let attempt = 0; attempt < 3 && poolIdx < pool.length; attempt++) {
                 const replacement = pool[poolIdx++];
                 const probePromise = _probeOne({ model: replacement.id, endpoint: replacement.url, endpointId: replacement.endpointId });
-                const timeoutPromise = new Promise(r => setTimeout(() => r({ status: 'timeout', error: 'Swap timed out' }), 10000));
+                const timeoutPromise = new Promise(r => setTimeout(() => r({ status: 'timeout', error: 'Swap timed out' }), 1000000));
                 const probeResult = await Promise.race([probePromise, timeoutPromise]);
                 if (probeResult.status === 'ok') {
                   selections[i] = { model: replacement.id, endpoint: replacement.url, endpointId: replacement.endpointId, name: replacement.name };

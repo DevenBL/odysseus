@@ -1421,7 +1421,7 @@ function initEndpointForm() {
     _refreshOfflineCount();
   }
 
-  const _fetchWithTimeout = async (url, opts = {}, timeoutMs = 25000) => {
+  const _fetchWithTimeout = async (url, opts = {}, timeoutMs = 2500000) => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     try {

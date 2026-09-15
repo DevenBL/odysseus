@@ -1018,7 +1018,7 @@ def setup_document_routes(session_manager, upload_handler=None) -> APIRouter:
                 temperature=0.1,
                 max_tokens=200,
                 headers=headers,
-                timeout=30,
+                timeout=3000,
             )
 
             # Parse verdicts

@@ -169,7 +169,7 @@ import asyncio as _asyncio
 from starlette.middleware.base import BaseHTTPMiddleware as _BaseHTTPMiddleware
 from starlette.responses import JSONResponse as _JSONResponse
 
-REQUEST_HARD_TIMEOUT = float(os.getenv("REQUEST_HARD_TIMEOUT", "45"))
+REQUEST_HARD_TIMEOUT = float(os.getenv("REQUEST_HARD_TIMEOUT", "450000"))
 _TIMEOUT_EXEMPT_PREFIXES = (
     "/api/chat",            # streaming
     "/api/shell/stream",    # SSE
@@ -1082,7 +1082,7 @@ async def _startup_event():
                 )
                 for url in urls:
                     try:
-                        async with httpx.AsyncClient(timeout=5.0) as client:
+                        async with httpx.AsyncClient(timeout=50000.0) as client:
                             await client.get(url)
                         logger.info(f"Warmup ping OK: {url}")
                     except Exception as e:

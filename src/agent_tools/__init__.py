@@ -72,8 +72,8 @@ TOOL_HANDLERS.update(ADMIN_TOOL_HANDLERS)
 # is src.constants; always prefer importing from there for new code)
 # ---------------------------------------------------------------------------
 MAX_AGENT_ROUNDS = 50
-SHELL_TIMEOUT = 60
-PYTHON_TIMEOUT = 30
+SHELL_TIMEOUT = 600000
+PYTHON_TIMEOUT = 300000
 
 # Tool types that trigger execution
 TOOL_TAGS = {"bash", "python", "web_search", "web_fetch", "read_file", "write_file", "edit_file",

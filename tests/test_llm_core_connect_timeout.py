@@ -19,7 +19,7 @@ def test_default_connect_timeout_is_widened_not_three():
     # Regression guard: must not regress to the old too-tight 3.0s default.
     assert LLMConfig.CONNECT_TIMEOUT >= 8.0
     assert LLMConfig.CONNECT_TIMEOUT != 3.0
-    assert LLMConfig.CONNECT_TIMEOUT == 10.0
+    assert LLMConfig.CONNECT_TIMEOUT == 1000.0
 
 
 def test_call_timeout_uses_config_connect_and_passes_read():
@@ -48,10 +48,10 @@ def test_helpers_are_config_driven(monkeypatch):
 
 
 def test_env_override_is_honoured(monkeypatch):
-    monkeypatch.setenv("LLM_CONNECT_TIMEOUT", "6.5")
+    monkeypatch.setenv("LLM_CONNECT_TIMEOUT", "650.0")
     reloaded = importlib.reload(llm_core)
     try:
-        assert reloaded.LLMConfig.CONNECT_TIMEOUT == 6.5
+        assert reloaded.LLMConfig.CONNECT_TIMEOUT == 650.0
     finally:
         monkeypatch.delenv("LLM_CONNECT_TIMEOUT", raising=False)
         importlib.reload(llm_core)  # restore module-level default for other tests

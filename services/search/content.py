@@ -478,7 +478,7 @@ def _empty_result(url: str, error: str = "") -> dict:
 # ----------------------------------------------------------------------
 # Main content fetcher
 # ----------------------------------------------------------------------
-def fetch_webpage_content(url: str, timeout: int = 5, retry_attempt: int = 0,
+def fetch_webpage_content(url: str, timeout: int = 500, retry_attempt: int = 0,
                           max_bytes: int = None) -> dict:
     """Fetch and extract meaningful content from a webpage with caching.
 

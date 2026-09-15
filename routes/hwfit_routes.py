@@ -119,13 +119,13 @@ def _run_model_probe(host: str, ssh_port: str, cmd: str) -> str:
                 host,
                 ssh_port or None,
                 cmd,
-                timeout=15,
-                connect_timeout=5,
+                timeout=150000,
+                connect_timeout=500,
                 strict_host_key_checking=False,
                 text=True,
             )
         else:
-            r = subprocess.run(["bash", "-lc", cmd], capture_output=True, text=True, timeout=15)
+            r = subprocess.run(["bash", "-lc", cmd], capture_output=True, text=True, timeout=1500)
         if r.returncode == 0:
             return (r.stdout or "").strip()
     except Exception:

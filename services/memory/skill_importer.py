@@ -122,7 +122,7 @@ def parse_skill_source(url: str) -> ResolvedSource:
 
     # skills.sh often links to GitHub; try to unwrap ?url= or redirect target later.
     if "skills.sh" in raw and "github.com" not in raw:
-        r = _get_checked(raw, timeout=20.0)
+        r = _get_checked(raw, timeout=2000.0)
         if r.status_code >= 400:
             raise _github_response_error(r)
         final = str(r.url)
@@ -207,7 +207,7 @@ def _github_response_error(response: httpx.Response) -> SkillImportError:
 
 
 def _fetch_bytes(url: str) -> bytes:
-    r = _get_checked(url, headers={"Accept": "application/vnd.github+json"}, timeout=30.0)
+    r = _get_checked(url, headers={"Accept": "application/vnd.github+json"}, timeout=3000.0)
     if r.status_code >= 400:
         raise _github_response_error(r)
     _assert_github_url(str(r.url), context="redirect target")
@@ -228,7 +228,7 @@ def _list_github_dir(src: ResolvedSource, rel_dir: str, out: Dict[str, str], *, 
     if depth > 4 or len(out) >= MAX_FILES:
         return
     url = _api_contents_url(src, rel_dir)
-    r = _get_checked(url, headers={"Accept": "application/vnd.github+json"}, timeout=30.0)
+    r = _get_checked(url, headers={"Accept": "application/vnd.github+json"}, timeout=3000.0)
     if r.status_code >= 400:
         raise _github_response_error(r)
     _assert_github_url(str(r.url), context="redirect target")

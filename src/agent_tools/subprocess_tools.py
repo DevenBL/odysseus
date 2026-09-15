@@ -8,7 +8,7 @@ import collections
 from typing import Optional, Callable, Awaitable, Tuple, Dict
 from src.constants import MAX_OUTPUT_CHARS
 
-DEFAULT_BASH_TIMEOUT = 60 * 60     # 1 hour
+DEFAULT_BASH_TIMEOUT = 600000 * 60     # 1 hour
 DEFAULT_PYTHON_TIMEOUT = 60 * 60
 
 PROGRESS_INTERVAL_S = 2.0
@@ -50,7 +50,7 @@ async def _tmux_has_session(name: str) -> bool:
 async def _tmux_capture(name: str) -> str:
     out, _, _ = await _run_exec(
         "tmux", "capture-pane", "-p", "-J", "-S", f"-{TMUX_CAPTURE_LINES}", "-t", name,
-        timeout=5,
+        timeout=500,
     )
     return out
 
@@ -235,7 +235,7 @@ async def _run_subprocess_streaming(
         except Exception:
             pass
         try:
-            await asyncio.wait_for(proc.wait(), timeout=2)
+            await asyncio.wait_for(proc.wait(), timeout=200)
         except Exception:
             pass
     except asyncio.CancelledError:
@@ -244,7 +244,7 @@ async def _run_subprocess_streaming(
         except Exception:
             pass
         try:
-            await asyncio.wait_for(proc.wait(), timeout=2)
+            await asyncio.wait_for(proc.wait(), timeout=200)
         except Exception:
             pass
         for t in (rd_out, rd_err):
@@ -261,7 +261,7 @@ async def _run_subprocess_streaming(
                 pass
         for t in (rd_out, rd_err):
             try:
-                await asyncio.wait_for(t, timeout=1)
+                await asyncio.wait_for(t, timeout=100)
             except Exception:
                 pass
 

@@ -215,7 +215,7 @@ def check_arch():
     try:
         translated = subprocess.run(
             ["sysctl", "-n", "sysctl.proc_translated"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True, text=True, timeout=500,
         ).stdout.strip()
     except Exception:
         translated = ""
