@@ -223,7 +223,7 @@ async def dispatch_reminder(
                         {"role": "system", "content": sys_prompt},
                         {"role": "user", "content": f"Title: {title}\n\n{note_body}".strip()},
                     ],
-                    temperature=0.7, max_tokens=200, headers=headers, timeout=300000,
+                    temperature=0.7, max_tokens=200, headers=headers, timeout=30,
                 )
                 from src.text_helpers import strip_think as _strip_think
                 # prose=True strips untagged "The user wants me to…" chain-of-thought.
@@ -456,7 +456,7 @@ async def dispatch_reminder(
                         if not _ok:
                             webhook_error = f"Webhook URL rejected: {_reason}"
                         else:
-                            async with httpx.AsyncClient(timeout=100000.0) as client:
+                            async with httpx.AsyncClient(timeout=10.0) as client:
                                 resp = await client.post(url, content=rendered.encode(), headers=hdrs)
                                 webhook_sent = resp.is_success
                                 if not webhook_sent:
@@ -497,7 +497,7 @@ async def dispatch_reminder(
                 if not _ok:
                     ntfy_error = f"ntfy URL rejected: {_reason}"
                 else:
-                    async with httpx.AsyncClient(timeout=100000.0) as client:
+                    async with httpx.AsyncClient(timeout=10.0) as client:
                         resp = await client.post(f"{base}/{topic}", content=ntfy_body, headers=hdrs)
                         ntfy_sent = resp.is_success
                         if not ntfy_sent:
